@@ -1,6 +1,9 @@
 import React from 'react';
 import ReactFlow, { addEdge, MiniMap, Controls, Background, ReactFlowProvider, useNodesState, useEdgesState } from 'reactflow';
 import 'reactflow/dist/style.css';
+import DialogNode from './DialogNode.jsx';
+
+const nodeTypes = { dialog: DialogNode };
 
 function scriptToFlow(script) {
   const nodes = [];
@@ -8,6 +11,7 @@ function scriptToFlow(script) {
   script.forEach((node, idx) => {
     nodes.push({
       id: node.id,
+      type: 'dialog',
       position: { x: idx * 200, y: idx * 80 },
       data: { speaker: node.speaker || '', text: node.text || '' }
     });
@@ -109,13 +113,22 @@ export default function App() {
 
   const addNodeButton = () => {
     const id = `node${nodes.length + 1}`;
-    setNodes(ns => [...ns, { id, position: { x: 50 * ns.length, y: 50 * ns.length }, data: { speaker: '', text: '' } }]);
+    setNodes(ns => [
+      ...ns,
+      {
+        id,
+        type: 'dialog',
+        position: { x: 50 * ns.length, y: 50 * ns.length },
+        data: { speaker: '', text: '' }
+      }
+    ]);
   };
+
+  const [validationMsg, setValidationMsg] = React.useState('');
 
   React.useEffect(() => {
     const ok = validate(nodes, edges, 'start');
-    const el = document.getElementById('validation');
-    if (el) el.textContent = ok ? 'Valid path exists' : 'Dialogue has no end path';
+    setValidationMsg(ok ? 'Valid path exists' : 'Dialogue has no end path');
   }, [nodes, edges]);
 
   const saveJson = () => {
@@ -129,39 +142,44 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
-  React.useEffect(() => {
-    const addBtn = document.getElementById('add-node');
-    const saveBtn = document.getElementById('save-json');
-    if (addBtn) addBtn.onclick = addNodeButton;
-    if (saveBtn) saveBtn.onclick = saveJson;
-  }, [nodes, edges]);
 
   return (
     <ReactFlowProvider>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onNodeClick={(e, node) => setSelected(node)}
-        fitView
-      >
-        <MiniMap />
-        <Controls />
-        <Background />
-      </ReactFlow>
-      {selected && (
-        <NodeEditor
-          node={selected}
+      <div id="reactflow">
+        <ReactFlow
           nodes={nodes}
           edges={edges}
-          updateNode={updateNode}
-          addChoice={addChoice}
-          removeEdge={removeEdge}
-          changeEdge={changeEdge}
-        />
-      )}
+          nodeTypes={nodeTypes}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onNodeClick={(e, node) => setSelected(node)}
+          fitView
+        >
+          <MiniMap />
+          <Controls />
+          <Background />
+        </ReactFlow>
+      </div>
+      <div id="sidebar">
+        <h3>Edit Node</h3>
+        {selected && (
+          <NodeEditor
+            node={selected}
+            nodes={nodes}
+            edges={edges}
+            updateNode={updateNode}
+            addChoice={addChoice}
+            removeEdge={removeEdge}
+            changeEdge={changeEdge}
+          />
+        )}
+        <div id="validation" style={{ marginTop: '10px', fontWeight: 'bold' }}>
+          {validationMsg}
+        </div>
+        <button onClick={addNodeButton} id="add-node">Add Node</button>
+        <button onClick={saveJson} id="save-json">Download JSON</button>
+      </div>
     </ReactFlowProvider>
   );
 }
