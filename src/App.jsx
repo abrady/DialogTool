@@ -1,13 +1,6 @@
-const {
-  ReactFlow: ReactFlowComponent,
-  addEdge,
-  MiniMap,
-  Controls,
-  Background,
-  ReactFlowProvider,
-  useNodesState,
-  useEdgesState
-} = window.ReactFlow;
+import React from 'react';
+import ReactFlow, { addEdge, MiniMap, Controls, Background, ReactFlowProvider, useNodesState, useEdgesState } from 'reactflow';
+import 'reactflow/dist/style.css';
 
 function scriptToFlow(script) {
   const nodes = [];
@@ -91,13 +84,13 @@ function NodeEditor({ node, nodes, edges, updateNode, addChoice, removeEdge, cha
   );
 }
 
-function App() {
+export default function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selected, setSelected] = React.useState(null);
 
   React.useEffect(() => {
-    fetch('data/dialog.json').then(r => r.json()).then(data => {
+    fetch('/data/dialog.json').then(r => r.json()).then(data => {
       const [n, e] = scriptToFlow(data);
       setNodes(n);
       setEdges(e);
@@ -121,7 +114,8 @@ function App() {
 
   React.useEffect(() => {
     const ok = validate(nodes, edges, 'start');
-    document.getElementById('validation').textContent = ok ? 'Valid path exists' : 'Dialogue has no end path';
+    const el = document.getElementById('validation');
+    if (el) el.textContent = ok ? 'Valid path exists' : 'Dialogue has no end path';
   }, [nodes, edges]);
 
   const saveJson = () => {
@@ -136,13 +130,15 @@ function App() {
   };
 
   React.useEffect(() => {
-    document.getElementById('add-node').onclick = addNodeButton;
-    document.getElementById('save-json').onclick = saveJson;
+    const addBtn = document.getElementById('add-node');
+    const saveBtn = document.getElementById('save-json');
+    if (addBtn) addBtn.onclick = addNodeButton;
+    if (saveBtn) saveBtn.onclick = saveJson;
   }, [nodes, edges]);
 
   return (
     <ReactFlowProvider>
-      <ReactFlowComponent
+      <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
@@ -154,7 +150,7 @@ function App() {
         <MiniMap />
         <Controls />
         <Background />
-      </ReactFlowComponent>
+      </ReactFlow>
       {selected && (
         <NodeEditor
           node={selected}
@@ -170,4 +166,3 @@ function App() {
   );
 }
 
-ReactDOM.render(<App />, document.getElementById('root'));
