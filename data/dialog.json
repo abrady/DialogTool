@@ -1,0 +1,35 @@
+[
+  {
+    "id": "start",
+    "speaker": "Overlord",
+    "text": "14195, do you hear me?",
+    "choices": [
+      { "text": "Hmmm...", "next": "resp1" },
+      { "text": "Where am I?", "next": "resp2" },
+      { "text": "Ah! A talking eyeball!", "next": "resp3" }
+    ]
+  },
+  {
+    "id": "resp1",
+    "speaker": "Overlord",
+    "text": "Good, you are awake.",
+    "next": "afterIntro"
+  },
+  {
+    "id": "resp2",
+    "speaker": "Overlord",
+    "text": "You are in my domain.",
+    "next": "afterIntro"
+  },
+  {
+    "id": "resp3",
+    "speaker": "Overlord",
+    "text": "Yes, I am more than just an eyeball.",
+    "next": "afterIntro"
+  },
+  {
+    "id": "afterIntro",
+    "speaker": "Overlord",
+    "text": "You have been revived for a critical task: the city is in danger and needs your help..."
+  }
+]
