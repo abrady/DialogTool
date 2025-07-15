@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dialog Editor</title>
+  <link rel="stylesheet" href="https://unpkg.com/reactflow@11.11.4/dist/style.css" />
+  <style>
+    html, body, #root { margin: 0; padding: 0; width: 100%; height: 100%; }
+    #sidebar { position: absolute; right: 0; top: 0; width: 260px; background: #f8f8f8; height: 100%; overflow-y: auto; padding: 10px; box-sizing: border-box; }
+    #editor input, #editor textarea, #editor select { width: 100%; box-sizing: border-box; margin-bottom: 6px; }
+    #reactflow { width: calc(100% - 260px); height: 100%; }
+  </style>
+</head>
+<body>
+  <div id="reactflow"></div>
+  <div id="sidebar">
+    <h3>Edit Node</h3>
+    <div id="editor"></div>
+    <div id="validation" style="margin-top:10px;font-weight:bold;"></div>
+    <button id="add-node">Add Node</button>
+    <button id="save-json">Download JSON</button>
+  </div>
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/reactflow@11.11.4/dist/umd/index.js"></script>
+  <script type="text/babel" src="editor.js"></script>
+</body>
+</html>
