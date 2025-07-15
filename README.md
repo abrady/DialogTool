@@ -1,6 +1,6 @@
 # DialogTool
 
-A browser-based dialog editor using React Flow. It loads dialog data from `public/data/dialog.json` and allows you to visually edit nodes and choices. Select a node to edit speaker, text, and choices in the sidebar. Add new nodes or download the dialog as JSON.
+A browser-based dialog editor using React Flow. It loads dialog data from `public/data/dialog.yarn` (falling back to `dialog.json`) and allows you to visually edit nodes and choices. Select a node to edit speaker, text, and choices in the sidebar. Add new nodes or download the dialog as JSON or Yarn.
 
 ## Running locally
 

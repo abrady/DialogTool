@@ -2,6 +2,7 @@ import React from 'react';
 import ReactFlow, { addEdge, MiniMap, Controls, Background, ReactFlowProvider, useNodesState, useEdgesState } from 'reactflow';
 import 'reactflow/dist/style.css';
 import DialogNode from './DialogNode.jsx';
+import { parseYarnSpinner } from 'yarnspinner2js';
 
 const nodeTypes = { dialog: DialogNode };
 
@@ -46,6 +47,53 @@ function flowToScript(nodes, edges) {
     out.push(obj);
   });
   return out;
+}
+
+function yarnToScript(text) {
+  const nodes = parseYarnSpinner(text);
+  return nodes.map(n => {
+    const obj = { id: n.title };
+    const lines = [];
+    let speaker = '';
+    let next = null;
+    const choices = [];
+    n.body.forEach(item => {
+      if (item.type === 'speech') {
+        if (!speaker) speaker = item.name || '';
+        lines.push(item.text);
+      } else if (item.type === 'command') {
+        if (item.name === 'jump') {
+          next = item.parameters[0];
+        } else if (item.name === 'choice') {
+          const textParam = item.parameters[0].replace(/^"|"$/g, '');
+          const goto = item.parameters.find(p => p.startsWith('goto:'));
+          if (goto) choices.push({ text: textParam, next: goto.slice(5) });
+        }
+      }
+    });
+    obj.text = lines.join('\n');
+    if (speaker) obj.speaker = speaker;
+    if (choices.length) obj.choices = choices;
+    else if (next) obj.next = next;
+    return obj;
+  });
+}
+
+function scriptToYarn(script) {
+  return script.map(n => {
+    const lines = [`title: ${n.id}`, '---'];
+    const text = n.speaker ? `${n.speaker}: ${n.text}` : n.text;
+    lines.push(text);
+    if (n.choices && n.choices.length) {
+      n.choices.forEach(c => {
+        lines.push(`<<choice "${c.text}" goto:${c.next}>>`);
+      });
+    } else if (n.next) {
+      lines.push(`<<jump ${n.next}>>`);
+    }
+    lines.push('===\n');
+    return lines.join('\n');
+  }).join('\n');
 }
 
 function validate(nodes, edges, startId) {
@@ -94,11 +142,23 @@ export default function App() {
   const [selected, setSelected] = React.useState(null);
 
   React.useEffect(() => {
-    fetch('/data/dialog.json').then(r => r.json()).then(data => {
-      const [n, e] = scriptToFlow(data);
-      setNodes(n);
-      setEdges(e);
-    });
+    fetch('/data/dialog.yarn')
+      .then(r => r.text())
+      .then(txt => {
+        const script = yarnToScript(txt);
+        const [n, e] = scriptToFlow(script);
+        setNodes(n);
+        setEdges(e);
+      })
+      .catch(() => {
+        fetch('/data/dialog.json')
+          .then(r => r.json())
+          .then(data => {
+            const [n, e] = scriptToFlow(data);
+            setNodes(n);
+            setEdges(e);
+          });
+      });
   }, []);
 
   const onConnect = React.useCallback(params => setEdges(eds => addEdge({ ...params, label: '' }, eds)), []);
@@ -142,6 +202,18 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
+  const saveYarn = () => {
+    const script = flowToScript(nodes, edges);
+    const yarn = scriptToYarn(script);
+    const blob = new Blob([yarn], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'dialog.yarn';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
 
   return (
     <ReactFlowProvider>
@@ -179,6 +251,7 @@ export default function App() {
         </div>
         <button onClick={addNodeButton} id="add-node">Add Node</button>
         <button onClick={saveJson} id="save-json">Download JSON</button>
+        <button onClick={saveYarn} id="save-yarn">Download Yarn</button>
       </div>
     </ReactFlowProvider>
   );

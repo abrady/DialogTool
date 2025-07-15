@@ -1,0 +1,30 @@
+title: start
+---
+Overlord: 14195, do you hear me?
+<<choice "Hmmm..." goto:resp1>>
+<<choice "Where am I?" goto:resp2>>
+<<choice "Ah! A talking eyeball!" goto:resp3>>
+===
+
+title: resp1
+---
+Overlord: Good, you are awake.
+<<jump afterIntro>>
+===
+
+title: resp2
+---
+Overlord: You are in my domain.
+<<jump afterIntro>>
+===
+
+title: resp3
+---
+Overlord: Yes, I am more than just an eyeball.
+<<jump afterIntro>>
+===
+
+title: afterIntro
+---
+Overlord: You have been revived for a critical task: the city is in danger and needs your help...
+===
